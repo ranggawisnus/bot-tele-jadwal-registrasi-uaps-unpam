@@ -32,14 +32,14 @@ jobs:
       uses: actions/checkout@v3
 
     # Cache state file agar hash tersimpan antar-run
-    - name: Cache state
-      id: cache-state
-      uses: actions/cache@v3
-      with:
-        path: page_hash.txt
-        key: website-state-${{ github.run_id }}
-        restore-keys: |
-          website-state-
+    # - name: Cache state
+    # id: cache-state
+    #  uses: actions/cache@v3
+    #  with:
+    #   path: page_hash.txt
+    #    key: website-state-${{ github.run_id }}
+    #    restore-keys: |
+    #      website-state-
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -55,10 +55,6 @@ jobs:
         TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         CHAT_ID: ${{ secrets.CHAT_ID }}
       run: python main.py
-      
-    # Hack untuk menyimpan state file kembali ke cache (GitHub Actions sifatnya stateless)
-    # Cara paling robust sebenarnya commit balik ke repo, tapi itu "mengotori" history.
-    # Alternatif: Commit file page_hash.txt kembali ke repo.
     
     - name: Commit and push changes if hash changed
       run: |
