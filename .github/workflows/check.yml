@@ -1,0 +1,52 @@
+name: Cek Website Unpam
+
+on:
+  schedule:
+    # Jalan setiap 6 jam (Jam 0, 6, 12, 18 UTC)
+    - cron: '0 0,6,12,18 * * *'
+  workflow_dispatch: # Supaya bisa di-klik run manual untuk tes
+
+jobs:
+  check_website:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Cache state file agar hash tersimpan antar-run
+    - name: Cache state
+      id: cache-state
+      uses: actions/cache@v3
+      with:
+        path: page_hash.txt
+        key: website-state-${{ github.run_id }}
+        restore-keys: |
+          website-state-
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        pip install requests beautifulsoup4
+
+    - name: Run script
+      env:
+        TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        CHAT_ID: ${{ secrets.CHAT_ID }}
+      run: python main.py
+      
+    # Hack untuk menyimpan state file kembali ke cache (GitHub Actions sifatnya stateless)
+    # Cara paling robust sebenarnya commit balik ke repo, tapi itu "mengotori" history.
+    # Alternatif: Commit file page_hash.txt kembali ke repo.
+    
+    - name: Commit and push changes if hash changed
+      run: |
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git add page_hash.txt
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update page hash" && git push)
+        
