@@ -46,7 +46,9 @@ def get_page_content_hash():
         
         return hashlib.md5(clean_text.encode('utf-8')).hexdigest()
     except Exception as e:
-        print(f"Error scraping: {e}")
+        error_msg = f"⚠️ **SISTEM ERROR!**\n\nGagal mengakses website UNPAM.\nKode/Pesan: `{str(e)}`\n\nCek Log GitHub segera."
+        print(error_msg)
+        send_telegram_message(error_msg) # Kirim laporan error ke Telegram
         return None
 
 def check_for_updates():
