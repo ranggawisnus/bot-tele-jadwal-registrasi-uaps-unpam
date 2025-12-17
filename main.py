@@ -8,11 +8,12 @@ import sys
 URL = "https://informatika.unpam.ac.id/info-pendaftaran-dan-jadwal-sidang-tugas-akhir"
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN") # Ambil dari environment variable
 CHAT_ID = os.environ.get("CHAT_ID")
+CHANNEL_ID = os.environ.get("CHANNEL_ID")
 STATE_FILE = "page_hash.txt"
 
-def send_telegram_message(message):
+def send_telegram_message(message, chat_id):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    data = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
+    data = {"chat_id": chat_id, "text": message, "parse_mode": "Markdown"}
     try:
         response = requests.post(url, data=data)
         response.raise_for_status()
@@ -48,7 +49,7 @@ def get_page_content_hash():
     except Exception as e:
         error_msg = f"⚠️ **SISTEM ERROR!**\n\nGagal mengakses website UNPAM.\nKode/Pesan: `{str(e)}`\n\nCek Log GitHub segera."
         print(error_msg)
-        send_telegram_message(error_msg) # Kirim laporan error ke Telegram
+        send_telegram_message(error_msg, CHAT_ID) # Kirim laporan error ke Telegram
         return None
 
 def check_for_updates():
@@ -80,7 +81,7 @@ def check_for_updates():
                 f"Halaman Info Sidang/TA Unpam telah berubah.\n"
                 f"Cek segera: {URL}"
             )
-            send_telegram_message(msg)
+            send_telegram_message(msg, CHANNEL_ID)
         else:
             print("Inisialisasi pertama. Hash disimpan.")
     else:
